@@ -7,6 +7,7 @@ import '../../../core/widgets/conversion_progress.dart';
 import '../../../core/widgets/error_card.dart';
 import '../../../core/widgets/success_card.dart';
 import '../../../core/widgets/banner_ad_widget.dart';
+import '../../../core/providers/shared_preferences_provider.dart';
 
 class DocumentConvertScreen extends ConsumerStatefulWidget {
   const DocumentConvertScreen({super.key});
@@ -17,9 +18,16 @@ class DocumentConvertScreen extends ConsumerStatefulWidget {
 
 class _DocumentConvertScreenState extends ConsumerState<DocumentConvertScreen> {
   String? _inputPath;
-  String _targetFormat = 'pdf';
+  late String _targetFormat;
   double _progress = 0.0;
   String? _stageLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    final prefs = ref.read(sharedPreferencesProvider);
+    _targetFormat = prefs.getString('default_format_documentConverter') ?? 'pdf';
+  }
 
   void _onFilePicked(String path) {
     setState(() {

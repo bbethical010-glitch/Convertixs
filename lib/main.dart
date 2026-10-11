@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/app.dart';
 import 'core/models/history_entry.dart';
 import 'core/services/history_service.dart';
+import 'core/providers/shared_preferences_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ void main() async {
     ProviderScope(
       overrides: [
         historyServiceProvider.overrideWithValue(historyService),
+        sharedPreferencesProvider.overrideWithValue(prefs),
       ],
       child: ConvertixApp(hasSeenOnboarding: hasSeenOnboarding),
     ),

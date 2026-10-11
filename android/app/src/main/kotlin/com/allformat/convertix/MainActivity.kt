@@ -3,6 +3,7 @@ package com.allformat.convertix
 import android.app.Activity
 import android.content.Intent
 import android.database.Cursor
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
 import io.flutter.embedding.android.FlutterActivity
@@ -10,6 +11,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import androidx.documentfile.provider.DocumentFile
 
 class MainActivity : FlutterActivity() {
 
@@ -18,6 +20,24 @@ class MainActivity : FlutterActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == FOLDER_PICK_REQUEST) {
+            val result = pendingResult ?: return
+            pendingResult = null
+            if (resultCode != Activity.RESULT_OK || data == null || data.data == null) {
+                result.success(null)
+                return
+            }
+            val uri = data.data!!
+            try {
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+                result.success(uri.toString())
+            } catch (e: Exception) {
+                result.error("PERMISSION_FAILED", "Failed to take persistable permission", null)
+            }
+            return
+        }
 
         if (requestCode != PICK_REQUEST) return
 
@@ -74,6 +94,20 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        MethodChannel(messenger, "com.allformat.convertix/media").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getMediaDuration" -> {
+                    val path = call.argument<String>("path")
+                    if (path != null) {
+                        result.success(getMediaDurationMs(path))
+                    } else {
+                        result.error("bad_arguments", "getMediaDuration requires path", null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+
         MethodChannel(messenger, PICKER_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "pickFiles" -> {
@@ -105,6 +139,25 @@ class MainActivity : FlutterActivity() {
                         )
                     }
                 }
+                "pickFolder" -> {
+                    if (pendingResult != null) {
+                        result.error("PICK_IN_PROGRESS", "Another picker is already open", null)
+                        return@setMethodCallHandler
+                    }
+                    pendingResult = result
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                    intent.addFlags(
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or 
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or 
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    )
+                    try {
+                        startActivityForResult(intent, FOLDER_PICK_REQUEST)
+                    } catch (e: Exception) {
+                        pendingResult = null
+                        result.error("PICK_FAILED", e.message, null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
@@ -117,6 +170,7 @@ class MainActivity : FlutterActivity() {
         val collection = call.argument<String>("collection")
         val relativeDir = call.argument<String>("relativeDir")
         val displayName = call.argument<String>("displayName")
+        val customFolderUri = call.argument<String>("customFolderUri")
 
         if (sourcePath == null || collection == null || relativeDir == null || displayName == null) {
             result.error(
@@ -129,7 +183,7 @@ class MainActivity : FlutterActivity() {
 
         when (
             val outcome = MediaStoreWriter(applicationContext)
-                .save(sourcePath, collection, relativeDir, displayName)
+                .save(sourcePath, collection, relativeDir, displayName, customFolderUri)
         ) {
             is MediaStoreWriter.Result.Success -> result.success(
                 mapOf(
@@ -234,9 +288,21 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun getMediaDurationMs(path: String): Long {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(path)
+            retriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_DURATION
+            )?.toLong() ?: 0L
+        } catch (e: Exception) { 0L }
+        finally { retriever.release() }
+    }
+
     private companion object {
         const val MEDIA_STORE_CHANNEL = "com.allformat.convertix/media_store"
         private const val PICKER_CHANNEL = "com.allformat.convertix/file_picker"
         private const val PICK_REQUEST = 7001
+        private const val FOLDER_PICK_REQUEST = 7002
     }
 }

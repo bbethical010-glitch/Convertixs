@@ -21,6 +21,7 @@ import '../document_convert/document_convert_provider.dart';
 import '../greyscale_pdf/greyscale_pdf_provider.dart';
 import '../merge_pdf/merge_pdf_provider.dart';
 import '../split_pdf/split_pdf_provider.dart';
+import '../../core/services/global_task_manager.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -28,6 +29,7 @@ class HistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyService = ref.watch(historyServiceProvider);
+    final activeTasks = ref.watch(globalTaskManagerProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -44,9 +46,9 @@ class HistoryScreen extends ConsumerWidget {
       body: ValueListenableBuilder<Box<HistoryEntry>>(
         valueListenable: historyService.listenable(),
         builder: (context, box, _) {
-          final entries = historyService.getAllEntries();
+          final entries = historyService.getAllEntries().where((e) => e.status != HistoryEntryStatus.active).toList();
 
-          if (entries.isEmpty) {
+          if (entries.isEmpty && activeTasks.isEmpty) {
             return _buildEmptyState(theme);
           }
 
@@ -71,6 +73,17 @@ class HistoryScreen extends ConsumerWidget {
 
           return CustomScrollView(
             slivers: [
+              if (activeTasks.isNotEmpty) ...[
+                _buildHeader('Active Tasks', theme),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return _ActiveTaskCard(task: activeTasks[index]);
+                    },
+                    childCount: activeTasks.length,
+                  ),
+                ),
+              ],
               if (today.isNotEmpty) ...[
                 _buildHeader('Today', theme),
                 _buildList(today),
@@ -494,6 +507,212 @@ class _HistoryCard extends ConsumerWidget {
 
   void _cancelTask(WidgetRef ref) {
     switch (entry.toolName) {
+      case 'Video Converter':
+        ref.read(videoConverterProvider.notifier).cancel();
+        break;
+      case 'Video Compression':
+        ref.read(videoCompressionProvider.notifier).cancel();
+        break;
+      case 'Audio Converter':
+        ref.read(audioConverterProvider.notifier).cancel();
+        break;
+      case 'Video to Audio':
+        ref.read(videoToAudioProvider.notifier).cancel();
+        break;
+      case 'Image Converter':
+        ref.read(imageConverterProvider.notifier).cancel();
+        break;
+      case 'Image to PDF':
+        ref.read(imageToPdfProvider.notifier).cancel();
+        break;
+      case 'Document Converter':
+        ref.read(documentConvertProvider.notifier).cancel();
+        break;
+      case 'Greyscale PDF':
+        ref.read(greyscalePdfProvider.notifier).cancel();
+        break;
+      case 'Merge PDF':
+        ref.read(mergePdfProvider.notifier).cancel();
+        break;
+      case 'Split PDF':
+        ref.read(splitPdfProvider.notifier).cancel();
+        break;
+    }
+  }
+}
+
+class _ActiveTaskCard extends ConsumerWidget {
+  final ActiveTask task;
+
+  const _ActiveTaskCard({required this.task});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isFailed = task.status == TaskStatus.failed;
+    final isCancelling = task.status == TaskStatus.cancelled;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withAlpha(100),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildIcon(theme, !isFailed && !isCancelling, isFailed, task.inputFileName),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.inputFileName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  if (isFailed)
+                    Text(
+                      '${task.toolName} • Failed: ${task.errorMessage ?? "Unknown error"}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    )
+                  else if (isCancelling)
+                    Text(
+                      '${task.toolName} • Cancelling...',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${task.toolName} • ${task.stageLabel ?? "Processing..."}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (task.progress >= 0.0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: LinearProgressIndicator(
+                                    value: task.progress,
+                                    borderRadius: BorderRadius.circular(4),
+                                    minHeight: 6,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '${(task.progress * 100).toStringAsFixed(0)}%',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (task.progress < 0.0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                const Expanded(
+                                  child: LinearProgressIndicator(
+                                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                                    minHeight: 6,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                _buildElapsedText(theme, task.elapsed),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            if (!isFailed && !isCancelling && task.toolName != 'Image Converter')
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: IconButton(
+                  icon: const Icon(LucideIcons.x, size: 20),
+                  onPressed: () => _cancelTask(ref, task.toolName),
+                  tooltip: 'Cancel',
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElapsedText(ThemeData theme, Duration elapsed) {
+    final minutes = elapsed.inMinutes;
+    final seconds = elapsed.inSeconds % 60;
+    final timeStr = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    
+    return Text(
+      timeStr,
+      style: theme.textTheme.labelSmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w600,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+  }
+
+  Widget _buildIcon(ThemeData theme, bool isActive, bool isFailed, String filename) {
+    IconData iconData = LucideIcons.file;
+    Color iconColor = theme.colorScheme.primary;
+
+    if (isActive) {
+      iconData = LucideIcons.loader2;
+      iconColor = theme.colorScheme.secondary;
+    } else if (isFailed) {
+      iconData = LucideIcons.alertCircle;
+      iconColor = theme.colorScheme.error;
+    } else {
+      final ext = p.extension(filename).toLowerCase();
+      if (['.jpg', '.png', '.webp'].contains(ext)) {
+        iconData = LucideIcons.image;
+      } else if (['.mp4', '.mov'].contains(ext)) {
+        iconData = LucideIcons.video;
+      } else if (['.mp3', '.m4a', '.wav'].contains(ext)) {
+        iconData = LucideIcons.music;
+      } else if (ext == '.pdf') {
+        iconData = LucideIcons.fileText;
+      }
+    }
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: iconColor.withAlpha(30),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(iconData, color: iconColor, size: 20),
+    );
+  }
+
+  void _cancelTask(WidgetRef ref, String toolName) {
+    switch (toolName) {
       case 'Video Converter':
         ref.read(videoConverterProvider.notifier).cancel();
         break;

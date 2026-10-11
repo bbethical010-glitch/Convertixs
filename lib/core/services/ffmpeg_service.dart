@@ -19,12 +19,12 @@ class FFmpegService {
     required String command,
     required String jobId,
     required String outputPath,
-    void Function(double progress, [String? etaText])? onProgress,
+    void Function(double progress, Duration? eta, Duration elapsed)? onProgress,
   }) async {
     final stopwatch = Stopwatch()..start();
 
     try {
-      onProgress?.call(0.05);
+      onProgress?.call(0.05, null, stopwatch.elapsed);
 
       final mediaInfoSession = await FFprobeKit.getMediaInformation(sourcePath);
       final mediaInfo = mediaInfoSession.getMediaInformation();
@@ -47,31 +47,18 @@ class FFmpegService {
               var progress = time / durationMs;
               if (progress > 1.0) progress = 1.0;
               
-              String? etaText;
+              Duration? eta;
               final speed = statistics.getSpeed();
               if (speed > 0) {
                 final remainingMs = durationMs - time;
                 final remainingSec = (remainingMs / (speed * 1000)).round();
                 
-                final elapsedSec = stopwatch.elapsed.inSeconds;
-                final elapsedStr = elapsedSec > 60 ? '${elapsedSec ~/ 60}m ${elapsedSec % 60}s' : '${elapsedSec}s';
-                
-                if (stopwatch.elapsedMilliseconds < 3000) {
-                  etaText = 'Elapsed: $elapsedStr | ETA: Calculating...';
-                } else if (remainingSec > 0) {
-                  final minutes = remainingSec ~/ 60;
-                  final seconds = remainingSec % 60;
-                  if (minutes > 0) {
-                    etaText = 'Elapsed: $elapsedStr | ETA: ${minutes}m ${seconds}s';
-                  } else {
-                    etaText = 'Elapsed: $elapsedStr | ETA: ${seconds}s';
-                  }
-                } else {
-                  etaText = 'Elapsed: $elapsedStr | Finishing up...';
+                if (stopwatch.elapsedMilliseconds >= 3000 && remainingSec > 0) {
+                  eta = Duration(seconds: remainingSec);
                 }
               }
               
-              onProgress?.call(0.05 + (progress * 0.90), etaText);
+              onProgress?.call(0.05 + (progress * 0.90), eta, stopwatch.elapsed);
             }
           }
         },
@@ -99,7 +86,7 @@ class FFmpegService {
           bareFileName: p.basename(outputPath),
         );
         
-        onProgress?.call(1.0);
+        onProgress?.call(1.0, null, stopwatch.elapsed);
 
         return ConversionResult.success(
           outputPath: outputPath,

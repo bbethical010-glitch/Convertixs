@@ -6,6 +6,8 @@ import '../../../core/services/backend_service.dart';
 import '../../../core/services/file_service.dart';
 import '../../../core/services/history_service.dart';
 import '../../../core/services/output_location_service.dart';
+import '../../../core/services/global_task_manager.dart';
+import 'package:uuid/uuid.dart';
 
 final documentConvertProvider = AsyncNotifierProvider<DocumentConvertNotifier, ConversionResult?>(() {
   return DocumentConvertNotifier();
@@ -13,6 +15,7 @@ final documentConvertProvider = AsyncNotifierProvider<DocumentConvertNotifier, C
 
 class DocumentConvertNotifier extends AsyncNotifier<ConversionResult?> {
   CancelToken? _cancelToken;
+  String? _activeJobId;
 
   @override
   Future<ConversionResult?> build() async => null;
@@ -24,9 +27,27 @@ class DocumentConvertNotifier extends AsyncNotifier<ConversionResult?> {
   }) async {
     state = const AsyncLoading();
     _cancelToken = CancelToken();
+    final jobId = const Uuid().v4();
+    _activeJobId = jobId;
+
     final historyService = ref.read(historyServiceProvider);
+    
+    final inputFilename = inputPath.split(RegExp(r'[\\/]')).last;
+    final taskObj = ActiveTask(
+      taskId: jobId,
+      toolName: 'Document Converter',
+      inputFileName: inputFilename,
+      targetFormat: targetFormat,
+      progress: -1.0,
+      elapsed: Duration.zero,
+      startTime: DateTime.now(),
+      status: TaskStatus.running,
+      stageLabel: 'Starting...',
+    );
+    ref.read(globalTaskManagerProvider.notifier).registerTask(taskObj);
+    final startTime = DateTime.now();
     state = await AsyncValue.guard(() => historyService.runTaskWithHistory(
-      inputFilename: inputPath.split(RegExp(r'[\\/]')).last,
+      inputFilename: inputFilename,
       toolName: 'Document Converter',
       task: () async {
         final String outputDir = await fileService.getOutputDir();
@@ -42,24 +63,38 @@ class DocumentConvertNotifier extends AsyncNotifier<ConversionResult?> {
           filePaths: [inputPath],
           outputPath: outputPath,
           outputFilename: outputName,
-          onProgress: onProgress,
+          onProgress: (double p, [String? label]) {
+            onProgress?.call(p, label);
+            final elapsed = DateTime.now().difference(startTime);
+            ref.read(globalTaskManagerProvider.notifier).updateProgress(jobId, -1.0, null, elapsed, stageLabel: label);
+          },
           cancelToken: _cancelToken,
         );
         
         if (!result.success && !result.isCancelled) {
+          ref.read(globalTaskManagerProvider.notifier).failTask(jobId, result.errorMessage ?? 'Conversion failed');
           throw Exception(result.errorMessage ?? 'Conversion failed');
         }
         
         if (result.isCancelled) {
+          ref.read(globalTaskManagerProvider.notifier).cancelTask(jobId);
           return null;
         }
         
+        ref.read(globalTaskManagerProvider.notifier).completeTask(jobId);
         return result;
       }
-    ));
+    )).catchError((e) {
+      ref.read(globalTaskManagerProvider.notifier).failTask(jobId, e.toString());
+      throw e;
+    });
+    _activeJobId = null;
   }
 
   void cancel() {
+    if (_activeJobId != null) {
+      ref.read(globalTaskManagerProvider.notifier).cancelTask(_activeJobId!);
+    }
     _cancelToken?.cancel('User cancelled');
     state = const AsyncData(null);
   }

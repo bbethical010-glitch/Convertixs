@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/models/conversion_result.dart';
+import '../../core/providers/shared_preferences_provider.dart';
 import '../../core/widgets/banner_ad_widget.dart';
 import '../../core/widgets/conversion_progress.dart';
 import '../../core/widgets/file_picker_button.dart';
@@ -36,7 +37,7 @@ class MediaToolSettings {
   });
 }
 
-class MediaToolScreen extends StatefulWidget {
+class MediaToolScreen extends ConsumerStatefulWidget {
   final String title;
   final String inputLabel;
   final String toolName;
@@ -79,13 +80,13 @@ class MediaToolScreen extends StatefulWidget {
   });
 
   @override
-  State<MediaToolScreen> createState() => _MediaToolScreenState();
+  ConsumerState<MediaToolScreen> createState() => _MediaToolScreenState();
 }
 
-class _MediaToolScreenState extends State<MediaToolScreen> {
+class _MediaToolScreenState extends ConsumerState<MediaToolScreen> {
   File? _selectedFile;
   late String _outputFormat;
-  int _quality = 90;
+  late int _quality;
   int _bitrateKbps = defaultAudioBitrate;
   String _resolution = 'original';
   String _videoCodec = 'libx264';
@@ -98,7 +99,10 @@ class _MediaToolScreenState extends State<MediaToolScreen> {
   @override
   void initState() {
     super.initState();
-    _outputFormat = widget.initialOutputFormat;
+    final prefs = ref.read(sharedPreferencesProvider);
+    _outputFormat = prefs.getString('default_format_${widget.toolName}') ?? widget.initialOutputFormat;
+    _quality = prefs.getInt('quality_preset_${widget.toolName}') ?? 90;
+    
     if (widget.logProfileOptions.isNotEmpty) {
       _logProfileId = widget.logProfileOptions.first.value;
     }

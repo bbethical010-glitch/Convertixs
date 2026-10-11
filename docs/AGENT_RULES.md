@@ -256,3 +256,24 @@ Unauthorized changes to build configuration, dependencies, signing keys,
 or documentation structure have caused real build failures in this project.
 
 When in doubt: do less, report more, ask clearly.
+
+---
+
+## 8. PLAY STORE VERSION CODE RULE
+
+The current deployed Play Store version code is tracked in STATE.md
+under "Current Play Store Build".
+
+Rules:
+- NEVER use a versionCode that is less than or equal to the last 
+  deployed version code
+- Every new release AAB must have versionCode incremented by exactly 1
+- After building a new AAB for upload, update STATE.md with the new 
+  versionCode and versionName immediately
+- Do NOT build a release AAB without first checking STATE.md for the 
+  current deployed version code
+
+Current values (update STATE.md first if these are wrong):
+  Last deployed versionCode: 17
+  Last deployed versionName: 1.0.10
+  Next build must use versionCode: 18 minimum

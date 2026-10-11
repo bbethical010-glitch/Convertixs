@@ -15,6 +15,7 @@ import '../features/merge_pdf/merge_pdf_screen.dart';
 import '../features/split_pdf/split_pdf_screen.dart';
 import '../features/settings/licenses_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/settings/tool_settings_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -132,6 +133,12 @@ GoRouter buildAppRouter(bool hasSeenOnboarding) {
       name: 'licenses',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const LicensesScreen(),
+    ),
+    GoRoute(
+      path: '/tool-settings',
+      name: 'tool-settings',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ToolSettingsScreen(),
     ),
   ],
   );

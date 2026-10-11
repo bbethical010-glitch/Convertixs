@@ -61,6 +61,19 @@ const List<String> videoToAudioOutputFormats = [
   'ogg',
 ];
 
+const List<String> documentOutputFormats = [
+  'pdf',
+  'docx',
+  'xlsx',
+  'pptx',
+  'odt',
+  'ods',
+  'odp',
+  'rtf',
+  'txt',
+  'csv',
+];
+
 const List<int> audioBitrateOptions = [64, 128, 192, 320];
 const int defaultAudioBitrate = 192;
 

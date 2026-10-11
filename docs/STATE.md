@@ -1,5 +1,16 @@
 # Project State
 
+## Play Store Build Tracking
+
+| Field | Value |
+|---|---|
+| Last uploaded versionCode | 20 |
+| Last uploaded versionName | 1.0.12 |
+| Upload date | Aug 2026 |
+| Next minimum versionCode | 21 |
+| Signing keystore | new-upload-key.jks (generated Aug 25 2026) |
+| Play App Signing | Enrolled — Google holds app signing key |
+
 ## Current Phase
 
 Phase 1 — COMPLETED ✅

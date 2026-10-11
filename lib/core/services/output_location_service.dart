@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file_service.dart';
 
@@ -158,13 +159,17 @@ class OutputLocationService {
     }
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final customFolderUri = prefs.getString('output_folder_${tool.name}');
+
       final result = await _channel.invokeMapMethod<String, dynamic>(
         'saveToCollection',
-        <String, String>{
+        <String, String?>{
           'sourcePath': sourcePath,
           'collection': tool.collection.wireName,
           'relativeDir': relativeDir,
           'displayName': bareFileName,
+          'customFolderUri': customFolderUri,
         },
       );
 
@@ -192,6 +197,18 @@ class OutputLocationService {
         bareFileName: bareFileName,
         subDir: subDir,
       );
+    }
+  }
+
+  /// Launch folder picker and take permissions, returning the URI or null.
+  Future<String?> pickFolder() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      final result = await _channel.invokeMethod<String>('pickFolder');
+      return result;
+    } catch (e) {
+      debugPrint('Failed to pick folder: $e');
+      return null;
     }
   }
 

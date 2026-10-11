@@ -8,6 +8,8 @@ import '../../../core/services/backend_service.dart';
 import '../../../core/services/file_service.dart';
 import '../../../core/services/history_service.dart';
 import '../../../core/services/output_location_service.dart';
+import '../../../core/services/global_task_manager.dart';
+import 'package:uuid/uuid.dart';
 
 final splitPdfProvider = AsyncNotifierProvider<SplitPdfNotifier, ConversionResult?>(() {
   return SplitPdfNotifier();
@@ -15,6 +17,7 @@ final splitPdfProvider = AsyncNotifierProvider<SplitPdfNotifier, ConversionResul
 
 class SplitPdfNotifier extends AsyncNotifier<ConversionResult?> {
   CancelToken? _cancelToken;
+  String? _activeJobId;
 
   @override
   Future<ConversionResult?> build() async => null;
@@ -26,9 +29,27 @@ class SplitPdfNotifier extends AsyncNotifier<ConversionResult?> {
   }) async {
     state = const AsyncLoading();
     _cancelToken = CancelToken();
+    final jobId = const Uuid().v4();
+    _activeJobId = jobId;
+
     final historyService = ref.read(historyServiceProvider);
+
+    final inputFilename = inputPath.split(RegExp(r'[\\/]')).last;
+    final taskObj = ActiveTask(
+      taskId: jobId,
+      toolName: 'Split PDF',
+      inputFileName: inputFilename,
+      targetFormat: 'pdf',
+      progress: -1.0,
+      elapsed: Duration.zero,
+      startTime: DateTime.now(),
+      status: TaskStatus.running,
+      stageLabel: 'Starting...',
+    );
+    ref.read(globalTaskManagerProvider.notifier).registerTask(taskObj);
+    final startTime = DateTime.now();
     state = await AsyncValue.guard(() => historyService.runTaskWithHistory(
-      inputFilename: inputPath.split(RegExp(r'[\\/]')).last,
+      inputFilename: inputFilename,
       toolName: 'Split PDF',
       task: () async {
         final String outputDir = await fileService.getOutputDir();
@@ -44,20 +65,28 @@ class SplitPdfNotifier extends AsyncNotifier<ConversionResult?> {
           filePaths: [inputPath],
           outputPath: outputPath,
           outputFilename: outputName,
-          onProgress: onProgress,
+          onProgress: (double p, [String? label]) {
+            onProgress?.call(p, label);
+            final elapsed = DateTime.now().difference(startTime);
+            ref.read(globalTaskManagerProvider.notifier).updateProgress(jobId, -1.0, null, elapsed, stageLabel: label);
+          },
           cancelToken: _cancelToken,
           skipPublish: true, // We will extract and publish the PDFs ourselves
         );
         
         if (!result.success && !result.isCancelled) {
+          ref.read(globalTaskManagerProvider.notifier).failTask(jobId, result.errorMessage ?? 'Split failed');
           throw Exception(result.errorMessage ?? 'Split failed');
         }
         
         if (result.isCancelled) {
+          ref.read(globalTaskManagerProvider.notifier).cancelTask(jobId);
           return null;
         }
         
         onProgress?.call(0.96, 'Extracting PDF pages...');
+        final postElapsed = DateTime.now().difference(startTime);
+        ref.read(globalTaskManagerProvider.notifier).updateProgress(jobId, -1.0, null, postElapsed, stageLabel: 'Extracting PDF pages...');
         
         // Decode the ZIP file
         final bytes = await File(result.outputPath).readAsBytes();
@@ -131,6 +160,7 @@ class SplitPdfNotifier extends AsyncNotifier<ConversionResult?> {
         // The parent folder location
         final folderDisplayLocation = displayLocation != null ? p.dirname(displayLocation) : null;
         
+        ref.read(globalTaskManagerProvider.notifier).completeTask(jobId);
         return ConversionResult.success(
           outputPath: result.outputPath, // Keep the ZIP path in outputPath for Share
           outputFormat: 'pdf',
@@ -141,10 +171,17 @@ class SplitPdfNotifier extends AsyncNotifier<ConversionResult?> {
           isPublic: isPublic,
         );
       }
-    ));
+    )).catchError((e) {
+      ref.read(globalTaskManagerProvider.notifier).failTask(jobId, e.toString());
+      throw e;
+    });
+    _activeJobId = null;
   }
 
   void cancel() {
+    if (_activeJobId != null) {
+      ref.read(globalTaskManagerProvider.notifier).cancelTask(_activeJobId!);
+    }
     _cancelToken?.cancel('User cancelled');
     state = const AsyncData(null);
   }

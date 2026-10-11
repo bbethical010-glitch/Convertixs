@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import androidx.documentfile.provider.DocumentFile
 
 /**
  * Writes finished conversion outputs into Android's public media collections.
@@ -52,6 +53,7 @@ class MediaStoreWriter(private val context: Context) {
         collection: String,
         relativeDir: String,
         requestedName: String,
+        customFolderUri: String? = null,
     ): Result {
         val source = File(sourcePath)
         if (!source.exists() || !source.isFile) {
@@ -68,7 +70,9 @@ class MediaStoreWriter(private val context: Context) {
         }
 
         return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (customFolderUri != null) {
+                saveToCustomFolder(source, customFolderUri, requestedName)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 saveViaMediaStore(source, collection, relativeDir, requestedName)
             } else {
                 saveViaLegacyFile(source, relativeDir, requestedName)
@@ -80,6 +84,38 @@ class MediaStoreWriter(private val context: Context) {
         } catch (e: IOException) {
             Result.Failure("io_error", e.message ?: "Write failed")
         }
+    }
+
+    // --- Custom Folder : DocumentFile -----------------------------------------------------
+    private fun saveToCustomFolder(source: File, customFolderUri: String, requestedName: String): Result {
+        val treeUri = Uri.parse(customFolderUri)
+        val dir = DocumentFile.fromTreeUri(context, treeUri)
+            ?: return Result.Failure("permission_denied", "Cannot access the selected custom folder")
+            
+        if (!dir.canWrite()) {
+            return Result.Failure("permission_denied", "Do not have write permission for custom folder")
+        }
+
+        val stem = requestedName.substringBeforeLast('.', requestedName)
+        val ext = requestedName.substringAfterLast('.', "")
+        val suffix = if (ext.isEmpty()) "" else ".$ext"
+
+        var candidateName = requestedName
+        var counter = 1
+        while (dir.findFile(candidateName) != null) {
+            candidateName = "$stem ($counter)$suffix"
+            counter++
+        }
+
+        val mimeType = mimeTypeFor(candidateName)
+        val newFile = dir.createFile(mimeType, candidateName)
+            ?: return Result.Failure("io_error", "Failed to create file in custom folder")
+
+        context.contentResolver.openOutputStream(newFile.uri)?.use { out ->
+            source.inputStream().use { input -> input.copyTo(out) }
+        } ?: return Result.Failure("io_error", "Could not open stream to custom folder")
+
+        return Result.Success(newFile.uri.toString(), candidateName, "Custom Folder")
     }
 
     // --- API 29+ : MediaStore -------------------------------------------------------------

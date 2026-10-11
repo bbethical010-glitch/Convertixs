@@ -1,6 +1,14 @@
 import java.util.Properties
 import java.io.FileInputStream
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 1
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -31,8 +39,8 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.0.9"
+        versionCode = flutterVersionCode
+        versionName = flutterVersionName
     }
 
     val keystorePropertiesFile = rootProject.file("key.properties")
@@ -59,4 +67,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("androidx.documentfile:documentfile:1.0.1")
 }

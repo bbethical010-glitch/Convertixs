@@ -7,6 +7,7 @@ import '../../core/models/conversion_result.dart';
 import '../../core/services/file_service.dart';
 import '../../core/services/history_service.dart';
 import '../../core/services/output_location_service.dart';
+import '../../core/services/global_task_manager.dart';
 import '../media_tools/media_conversion_utils.dart';
 
 class ImageConverterConfig {
@@ -29,11 +30,28 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
     void Function(double, [String?])? onProgress,
   }) async {
     state = const AsyncLoading();
+    final jobId = uuid.v4();
+
     final historyService = ref.read(historyServiceProvider);
-    state = await AsyncValue.guard(() => historyService.runTaskWithHistory(
-      inputFilename: p.basename(inputFile.path),
+    
+    final inputFilename = p.basename(inputFile.path);
+    final taskObj = ActiveTask(
+      taskId: jobId,
       toolName: 'Image Converter',
-      task: () => _run(inputFile, config, onProgress),
+      inputFileName: inputFilename,
+      targetFormat: config.outputFormat.toLowerCase(),
+      progress: -1.0,
+      elapsed: Duration.zero,
+      startTime: DateTime.now(),
+      status: TaskStatus.running,
+      stageLabel: 'Converting...',
+    );
+    ref.read(globalTaskManagerProvider.notifier).registerTask(taskObj);
+
+    state = await AsyncValue.guard(() => historyService.runTaskWithHistory(
+      inputFilename: inputFilename,
+      toolName: 'Image Converter',
+      task: () => _run(inputFile, config, jobId, onProgress),
     ));
   }
 
@@ -41,10 +59,9 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
     state = const AsyncData(null);
   }
 
-  Future<ConversionResult> _run(File inputFile, ImageConverterConfig config, void Function(double, [String?])? onProgress) async {
-    onProgress?.call(0.1);
+  Future<ConversionResult> _run(File inputFile, ImageConverterConfig config, String jobId, void Function(double, [String?])? onProgress) async {
+    onProgress?.call(-1.0, 'Converting...');
     final stopwatch = Stopwatch()..start();
-    final jobId = uuid.v4();
     final targetFormat = config.outputFormat.toLowerCase();
     final outputPath = await buildFullOutputPath(inputFile, targetFormat);
 
@@ -54,6 +71,7 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
       final decodedImage = img.decodeImage(bytes);
 
       if (decodedImage == null) {
+        ref.read(globalTaskManagerProvider.notifier).failTask(jobId, 'Could not read this image.');
         return ConversionResult.failure(
           outputPath: outputPath,
           outputFormat: targetFormat,
@@ -62,7 +80,8 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
         );
       }
 
-      onProgress?.call(0.5);
+      onProgress?.call(-1.0, 'Converting...');
+      ref.read(globalTaskManagerProvider.notifier).updateProgress(jobId, -1.0, null, stopwatch.elapsed, stageLabel: 'Converting...');
 
       final encodedBytes = switch (targetFormat) {
         'jpg' || 'jpeg' => img.encodeJpg(decodedImage, quality: config.quality.clamp(10, 100)),
@@ -73,7 +92,8 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
         _ => throw UnsupportedError('Unsupported format $targetFormat'),
       };
 
-      onProgress?.call(0.8);
+      onProgress?.call(-1.0, 'Saving...');
+      ref.read(globalTaskManagerProvider.notifier).updateProgress(jobId, -1.0, null, stopwatch.elapsed, stageLabel: 'Saving...');
 
       final outFile = File(outputPath);
       await outFile.writeAsBytes(encodedBytes);
@@ -87,6 +107,7 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
       onProgress?.call(1.0);
 
       stopwatch.stop();
+      ref.read(globalTaskManagerProvider.notifier).completeTask(jobId);
 
       return ConversionResult.success(
         outputPath: outputPath,
@@ -99,6 +120,7 @@ class ImageConverterNotifier extends AsyncNotifier<ConversionResult?> {
       );
     } catch (_) {
       stopwatch.stop();
+      ref.read(globalTaskManagerProvider.notifier).failTask(jobId, 'Image conversion failed.');
       return ConversionResult.failure(
         outputPath: outputPath,
         outputFormat: targetFormat,
