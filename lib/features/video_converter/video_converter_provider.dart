@@ -58,8 +58,11 @@ class VideoConverterNotifier extends AsyncNotifier<ConversionResult?> {
     final tempInputPath = await fileService.copyToTemp(inputFile.path, jobId);
     final scaleFilter = scaleFilterForResolution(config.resolution);
     final scaleArg = scaleFilter == null ? '' : '-vf "$scaleFilter"';
+    final audioArg = videoCodec.extension == 'webm'
+        ? '-c:a libopus -b:a 128k'
+        : '-c:a copy';
     final command =
-        '-y -i ${quotePath(tempInputPath)} -c:v ${videoCodec.codec} -c:a copy $scaleArg ${quotePath(outputPath)}';
+        '-y -i ${quotePath(tempInputPath)} -c:v ${videoCodec.codec} $audioArg $scaleArg ${quotePath(outputPath)}';
 
     final inputFileName = inputFile.path.split(RegExp(r'[\\/]')).last;
     final task = ActiveTask(

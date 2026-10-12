@@ -98,6 +98,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
           _buildSectionHeader('General'),
+          ListTile(
+            leading: const Icon(LucideIcons.crown, color: Colors.amber),
+            title: const Text('Convertix Pro & Store', style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: const Text('Upgrade to Pro, remove ads, unlock 4K & LOG packs'),
+            trailing: const Icon(LucideIcons.chevronRight, size: 16),
+            onTap: () => context.push('/store'),
+          ),
           SwitchListTile(
             secondary: const Icon(LucideIcons.moon),
             title: const Text('Dark Mode'),

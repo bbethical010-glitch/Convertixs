@@ -113,6 +113,8 @@ class SplitPdfNotifier extends AsyncNotifier<ConversionResult?> {
           // Clean up temp file
           await File(tempPdfPath).delete();
           
+          ref.read(globalTaskManagerProvider.notifier).completeTask(jobId);
+
           return ConversionResult.success(
             outputPath: result.outputPath, // Keep the ZIP path in outputPath for Share
             outputFormat: 'pdf',

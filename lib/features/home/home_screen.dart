@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../core/providers/pro_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const List<_ToolTile> _mediaTools = [
@@ -62,7 +64,10 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final proStatus = ref.watch(proStatusProvider).value;
+    final isPro = proStatus?.isPro ?? false;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Convertix'),
@@ -70,6 +75,21 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         actions: [
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: isPro ? Colors.green : Colors.amber.shade700,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+            ),
+            icon: Icon(
+              isPro ? LucideIcons.badgeCheck : LucideIcons.crown,
+              size: 18,
+            ),
+            label: Text(
+              isPro ? 'PRO' : 'UPGRADE',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+            onPressed: () => context.push('/store'),
+          ),
           IconButton(
             icon: const Icon(LucideIcons.settings),
             onPressed: () => context.push('/settings'),
@@ -81,6 +101,10 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (!isPro) ...[
+            _buildProBanner(context),
+            const SizedBox(height: 20),
+          ],
           _buildSectionHeader(context, 'Media Tools'),
           const SizedBox(height: 12),
           _buildToolGrid(context, _mediaTools),
@@ -90,6 +114,68 @@ class HomeScreen extends StatelessWidget {
           _buildToolGrid(context, _documentTools),
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProBanner(BuildContext context) {
+    return InkWell(
+      onTap: () => context.push('/store'),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6366F1).withValues(alpha: 0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(LucideIcons.sparkles, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Get Convertix Pro & Bundles',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Remove ads, unlock 4K video & camera LOG profiles',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(LucideIcons.chevronRight, color: Colors.white70, size: 20),
+          ],
+        ),
       ),
     );
   }
