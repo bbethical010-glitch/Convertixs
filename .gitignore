@@ -17,6 +17,7 @@ build/
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.*
 **/android/key.properties
+**/android/.kotlin/
 
 # iOS
 **/ios/**/*.mode1v3

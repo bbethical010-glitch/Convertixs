@@ -17,6 +17,7 @@ import '../features/settings/licenses_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/settings/tool_settings_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/store/store_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -139,6 +140,12 @@ GoRouter buildAppRouter(bool hasSeenOnboarding) {
       name: 'tool-settings',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const ToolSettingsScreen(),
+    ),
+    GoRoute(
+      path: '/store',
+      name: 'store',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const StoreScreen(),
     ),
   ],
   );

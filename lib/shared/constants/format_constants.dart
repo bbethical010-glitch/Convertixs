@@ -6,7 +6,7 @@ const List<String> imageInputFormats = [
   'bmp',
   'tiff',
 ];
-const List<String> imageOutputFormats = ['jpg', 'png', 'webp', 'bmp', 'tiff'];
+const List<String> imageOutputFormats = ['jpg', 'png', 'bmp', 'tiff'];
 
 const List<String> videoInputFormats = [
   'mp4',

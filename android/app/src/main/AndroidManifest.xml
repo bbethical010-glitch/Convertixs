@@ -12,6 +12,7 @@
     <!-- Phase 6F Permissions -->
     <uses-permission android:name="android.permission.MANAGE_MEDIA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="com.android.vending.BILLING" />
     <application
         android:label="Convertix"
         android:name="${applicationName}"

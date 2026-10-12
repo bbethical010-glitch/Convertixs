@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import '../../shared/constants/ad_constants.dart';
+import '../providers/pro_provider.dart';
 
-class BannerAdWidget extends StatefulWidget {
+class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
 
   @override
-  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+  ConsumerState<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
-class _BannerAdWidgetState extends State<BannerAdWidget> {
+class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
   String? _adUnitId;
@@ -24,7 +26,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   void _loadAd() {
     if (kIsWeb) {
-      // Web doesn't support native banner ads the same way
+      return;
+    }
+
+    final isAdsRemoved = ref.read(proStatusProvider).value?.isAdsRemoved ?? false;
+    if (isAdsRemoved) {
       return;
     }
 
@@ -49,7 +55,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
               _isLoaded = false;
             });
           }
-          // Silently fail - don't show error UI for ad failures
         },
       ),
     );
@@ -63,7 +68,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     } else if (Platform.isIOS) {
       return iosBannerAdUnitId;
     }
-    // Default to Android test ID for other platforms
     return androidBannerAdUnitId;
   }
 
@@ -75,6 +79,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final proStatus = ref.watch(proStatusProvider).value;
+    if (proStatus?.isAdsRemoved == true) {
+      return const SizedBox.shrink();
+    }
+
     if (!_isLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
