@@ -39,6 +39,7 @@ class _FilePickerButtonState extends State<FilePickerButton> {
       final mimeType = toolMimeTypes[widget.toolName] ?? '*/*';
 
       final picked = await FilePickerService.pickFiles(
+        toolName: widget.toolName,
         mimeType: mimeType,
         allowMultiple: widget.allowMultiple,
       );

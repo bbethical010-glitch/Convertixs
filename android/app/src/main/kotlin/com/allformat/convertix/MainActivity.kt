@@ -15,7 +15,9 @@ import androidx.documentfile.provider.DocumentFile
 
 class MainActivity : FlutterActivity() {
 
+    private lateinit var filePickerChannel: FilePickerChannel
     private var pendingResult: MethodChannel.Result? = null
+    private var pendingToolName: String? = null
     private var allowMultiple: Boolean = false
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -42,11 +44,17 @@ class MainActivity : FlutterActivity() {
         if (requestCode != PICK_REQUEST) return
 
         val result = pendingResult ?: return
+        val toolName = pendingToolName
         pendingResult = null
+        pendingToolName = null
 
         if (resultCode != Activity.RESULT_OK || data == null) {
             result.success(null)
             return
+        }
+
+        if (toolName != null) {
+            filePickerChannel.onPickResult(toolName, data)
         }
 
         Thread {
@@ -57,7 +65,7 @@ class MainActivity : FlutterActivity() {
                     val name = getDisplayName(uri) ?: uri.lastPathSegment ?: "file"
                     val dest = copyToCache(uri, name)
                     if (dest != null) {
-                        picked.add(mapOf("path" to dest.absolutePath, "name" to name))
+                        picked.add(mapOf("path" to dest.absolutePath, "name" to dest.name))
                     }
                 }
 
@@ -81,6 +89,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         val messenger = flutterEngine.dartExecutor.binaryMessenger
+        filePickerChannel = FilePickerChannel(this)
 
         // Phase 5A — output placement.
         MethodChannel(messenger, MEDIA_STORE_CHANNEL).setMethodCallHandler { call, result ->
@@ -110,34 +119,43 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(messenger, PICKER_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-                "pickFiles" -> {
+                "launchPicker", "pickFiles" -> {
                     if (pendingResult != null) {
                         result.error("PICK_IN_PROGRESS", "Another file picker is already open", null)
                         return@setMethodCallHandler
                     }
 
+                    val toolName = call.argument<String>("toolName") ?: "default"
                     val mimeType = call.argument<String>("mimeType") ?: "*/*"
                     allowMultiple = call.argument<Boolean>("allowMultiple") ?: false
                     pendingResult = result
-
-                    val base = Intent(Intent.ACTION_GET_CONTENT).apply {
-                        type = mimeType
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        if (allowMultiple) {
-                            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                        }
-                    }
+                    pendingToolName = toolName
 
                     try {
-                        startActivityForResult(Intent.createChooser(base, null), PICK_REQUEST)
+                        filePickerChannel.launchPicker(toolName, mimeType, allowMultiple, PICK_REQUEST)
                     } catch (e: android.content.ActivityNotFoundException) {
                         pendingResult = null
+                        pendingToolName = null
                         result.error(
                             "PICK_FAILED",
                             "No app found that can open this file type. Please install a file manager like Files by Google.",
                             null,
                         )
                     }
+                }
+                "getPreferences" -> {
+                    result.success(filePickerChannel.getPreferences())
+                }
+                "resetPreference" -> {
+                    val toolName = call.argument<String>("toolName")
+                    if (toolName != null) {
+                        filePickerChannel.resetPreference(toolName)
+                    }
+                    result.success(true)
+                }
+                "resetAllPreferences" -> {
+                    filePickerChannel.resetAllPreferences()
+                    result.success(true)
                 }
                 "pickFolder" -> {
                     if (pendingResult != null) {
@@ -278,7 +296,15 @@ class MainActivity : FlutterActivity() {
     private fun copyToCache(uri: Uri, name: String): File? {
         return try {
             val dir = File(cacheDir, "convertix_picks").also { it.mkdirs() }
-            val dest = File(dir, name)
+            var dest = File(dir, name)
+            var counter = 1
+            while (dest.exists()) {
+                val stem = name.substringBeforeLast('.', name)
+                val ext = name.substringAfterLast('.', "")
+                val suffix = if (ext.isEmpty()) "" else ".$ext"
+                dest = File(dir, "$stem-$counter$suffix")
+                counter++
+            }
             contentResolver.openInputStream(uri)?.use { input ->
                 dest.outputStream().use { output -> input.copyTo(output) }
             }
