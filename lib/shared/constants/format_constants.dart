@@ -166,6 +166,7 @@ const Map<String, String> toolMimeTypes = {
 };
 
 bool isFileCompatible(String fileName, String toolName) {
+  if (!fileName.contains('.')) return false;
   final ext = fileName.split('.').last.toLowerCase();
   return toolAllowedExtensions[toolName]?.contains(ext) ?? false;
 }

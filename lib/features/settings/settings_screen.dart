@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/providers/theme_provider.dart';
 import '../../core/services/backend_service.dart';
+import '../../core/services/file_picker_service.dart';
 import '../../core/services/history_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -21,12 +22,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _version = '';
   bool _isBackendHealthy = false;
   bool _isCheckingBackend = true;
+  Map<String, String> _sourcePreferences = {};
+  bool _isLoadingPreferences = true;
+
+  static const Map<String, String> _toolTitles = {
+    'image_converter': 'Image Converter',
+    'video_to_audio': 'Video to Audio',
+    'audio_converter': 'Audio Converter',
+    'video_converter': 'Video Converter',
+    'video_compression': 'Video Compression',
+    'image_to_pdf': 'Image to PDF',
+    'document_convert': 'Document Converter',
+    'greyscale_pdf': 'Greyscale PDF',
+    'merge_pdf': 'Merge PDF',
+    'split_pdf': 'Split PDF',
+  };
 
   @override
   void initState() {
     super.initState();
     _loadAppInfo();
     _checkBackendHealth();
+    _loadFileSourcePreferences();
+  }
+
+  Future<void> _loadFileSourcePreferences() async {
+    final prefs = await FilePickerService.getPreferences();
+    if (mounted) {
+      setState(() {
+        _sourcePreferences = prefs;
+        _isLoadingPreferences = false;
+      });
+    }
+  }
+
+  String _formatToolName(String raw) {
+    return _toolTitles[raw] ??
+        raw
+            .split('_')
+            .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : '')
+            .join(' ');
   }
 
   Future<void> _loadAppInfo() async {
@@ -140,6 +175,68 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
             onTap: _checkBackendHealth,
           ),
+          const Divider(),
+          _buildSectionHeader('File Source Preferences'),
+          if (_isLoadingPreferences)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else if (_sourcePreferences.isEmpty)
+            ListTile(
+              leading: const Icon(LucideIcons.folderInput),
+              title: const Text('Default File Chooser'),
+              subtitle: Text(
+                'Convertix will show the Android system chooser. No default apps are currently remembered.',
+                style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+            )
+          else ...[
+            for (final entry in _sourcePreferences.entries)
+              ListTile(
+                leading: const Icon(LucideIcons.folderCheck),
+                title: Text(_formatToolName(entry.key)),
+                subtitle: Text(
+                  'Default: ${entry.value}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.primary),
+                ),
+                trailing: TextButton.icon(
+                  icon: const Icon(LucideIcons.rotateCcw, size: 14),
+                  label: const Text('Reset'),
+                  onPressed: () async {
+                    await FilePickerService.resetPreference(entry.key);
+                    await _loadFileSourcePreferences();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Reset ${_formatToolName(entry.key)} to system chooser'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: OutlinedButton.icon(
+                icon: const Icon(LucideIcons.rotateCcw, size: 16),
+                label: const Text('Reset All Sources to Default'),
+                onPressed: () async {
+                  await FilePickerService.resetAllPreferences();
+                  await _loadFileSourcePreferences();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('All file source preferences reset')),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
           const Divider(),
           _buildSectionHeader('Permissions'),
           ListTile(

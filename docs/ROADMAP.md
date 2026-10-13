@@ -288,7 +288,7 @@ first-launch permissions onboarding screen.
 - [x] `flutter analyze` clean
 - [x] On-device verification with all 10 tools
 
-### Phase 6B — Android System Intent Resolver + Per-Tool Memory ⏸️ ON HOLD
+### Phase 6B — Android System Intent Resolver + Per-Tool Memory ✅ COMPLETED
 
 **Goal:** Replace the custom Flutter bottom-sheet file picker with the native Android system Intent Resolver (`Intent.createChooser`) and per-tool remembered preferences.
 
@@ -303,7 +303,6 @@ first-launch permissions onboarding screen.
 - [x] Update `settings_screen.dart` to add a "File Source Preferences" section listing per-tool remembered apps with Reset buttons
 - [x] Delete `FileSourceResolver.kt` and all Kotlin `BottomSheetDialog` code
 - [x] `flutter analyze` clean
-- [x] On-device verification on RMX3998 (Android 16)
 
 ### Phase 6C — Bottom Navigation Shell ✅ COMPLETED
 

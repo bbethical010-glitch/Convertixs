@@ -45,22 +45,32 @@ android {
 
     val keystorePropertiesFile = rootProject.file("key.properties")
     val keystoreProperties = Properties()
-    if (keystorePropertiesFile.exists()) {
+    val hasKeystore = keystorePropertiesFile.exists()
+    if (hasKeystore) {
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
-            storePassword = keystoreProperties.getProperty("storePassword")
+        if (hasKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = keystoreProperties.getProperty("storeFile")?.let { path ->
+                    val f = file(path)
+                    if (f.exists()) f else rootProject.file(path)
+                }
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (hasKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

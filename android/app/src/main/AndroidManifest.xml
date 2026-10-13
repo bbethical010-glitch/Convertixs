@@ -42,6 +42,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- ChooserReceiver for Intent.createChooser app selection memory -->
+        <receiver
+            android:name=".ChooserReceiver"
+            android:exported="false" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -85,6 +90,16 @@
         <intent>
             <action android:name="android.intent.action.GET_CONTENT"/>
             <data android:mimeType="*/*"/>
+        </intent>
+
+        <!-- OEM Gallery apps supporting ACTION_PICK -->
+        <intent>
+            <action android:name="android.intent.action.PICK"/>
+            <data android:mimeType="image/*"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK"/>
+            <data android:mimeType="video/*"/>
         </intent>
 
         <!-- Handlers for "Open File" (Phase 5D). -->
