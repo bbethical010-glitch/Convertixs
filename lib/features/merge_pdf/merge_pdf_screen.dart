@@ -137,7 +137,11 @@ class _MergePdfScreenState extends ConsumerState<MergePdfScreen> {
               ),
             ),
           ),
-          if (!isConverting) const BannerAdWidget(),
+          Visibility(
+            visible: !isConverting,
+            maintainState: true,
+            child: const BannerAdWidget(),
+          ),
         ],
       ),
     );

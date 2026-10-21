@@ -119,7 +119,11 @@ class _GreyscalePdfScreenState extends ConsumerState<GreyscalePdfScreen> {
               ),
             ),
           ),
-          if (!isConverting) const BannerAdWidget(),
+          Visibility(
+            visible: !isConverting,
+            maintainState: true,
+            child: const BannerAdWidget(),
+          ),
         ],
       ),
     );

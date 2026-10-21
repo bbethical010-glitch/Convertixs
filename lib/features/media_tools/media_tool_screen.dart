@@ -177,9 +177,9 @@ class _MediaToolScreenState extends ConsumerState<MediaToolScreen> {
                       label: 'Quality preset',
                       value: _compressionQuality,
                       options: const [
-                        LabelledOption('high', 'High - CRF 18'),
-                        LabelledOption('balanced', 'Balanced - CRF 23'),
-                        LabelledOption('small', 'Small - CRF 28'),
+                        LabelledOption('high', 'High Quality'),
+                        LabelledOption('balanced', 'Balanced (Recommended)'),
+                        LabelledOption('small', 'Smallest File (WhatsApp & Email)'),
                       ],
                       onChanged: (value) => setState(() => _compressionQuality = value),
                     ),
@@ -204,11 +204,14 @@ class _MediaToolScreenState extends ConsumerState<MediaToolScreen> {
                 ],
               ),
             ),
-            if (!isLoading)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: BannerAdWidget(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Visibility(
+                visible: !isLoading,
+                maintainState: true,
+                child: const BannerAdWidget(),
               ),
+            ),
           ],
         ),
       ),

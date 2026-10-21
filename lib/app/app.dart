@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router.dart';
-import 'theme.dart';
+import '../new_ui/theme/brutalist_theme.dart';
 import '../core/providers/theme_provider.dart';
 
 class ConvertixApp extends ConsumerWidget {
@@ -17,9 +17,10 @@ class ConvertixApp extends ConsumerWidget {
       title: 'Convertix',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: BrutalTheme.themeData,
+      darkTheme: BrutalTheme.themeData,
       routerConfig: buildAppRouter(hasSeenOnboarding),
     );
   }
 }
+

@@ -126,7 +126,11 @@ class _ImageToPdfScreenState extends ConsumerState<ImageToPdfScreen> {
               ),
             ),
           ),
-          if (!isConverting) const BannerAdWidget(),
+          Visibility(
+            visible: !isConverting,
+            maintainState: true,
+            child: const BannerAdWidget(),
+          ),
         ],
       ),
     );

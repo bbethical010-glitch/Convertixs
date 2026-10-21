@@ -211,6 +211,16 @@ class StoreService {
     return true;
   }
 
+  /// Adds [amount] free credits (e.g. from Daily Loot or Reward Box).
+  Future<void> addFreeCredits(int amount) async {
+    final newBalance = _currentStatus.creditsBalance + amount;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('entitlement_credits_balance', newBalance);
+
+    _currentStatus = _currentStatus.copyWith(creditsBalance: newBalance);
+    _proStatusController.add(_currentStatus);
+  }
+
   Future<void> _loadSavedEntitlements() async {
     final prefs = await SharedPreferences.getInstance();
 

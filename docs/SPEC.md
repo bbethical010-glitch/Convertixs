@@ -6,7 +6,7 @@
 |---|---|
 | App name | Convertix |
 | Package name | `com.allformat.converter` |
-| Play Store version | 1.0.9 (version code 16) |
+| Play Store version | 1.1.3 (version code 26) |
 | Target SDK | 36 (Android 16) — mandatory by Aug 31, 2026 |
 | Min SDK | 24 (Android 7.0) |
 | Monetisation | Google AdMob (app-level App ID: `ca-app-pub-2093403233028868~6019383556`) |

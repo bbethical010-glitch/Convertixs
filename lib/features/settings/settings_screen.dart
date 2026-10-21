@@ -136,7 +136,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListTile(
             leading: const Icon(LucideIcons.crown, color: Colors.amber),
             title: const Text('Convertix Pro & Store', style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: const Text('Upgrade to Pro, remove ads, unlock 4K & LOG packs'),
+            subtitle: const Text('Upgrade to Pro, remove ads & unlock all packs'),
             trailing: const Icon(LucideIcons.chevronRight, size: 16),
             onTap: () => context.push('/store'),
           ),

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="mobile_stack" name="shell-type"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+        color: #000000;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .brutalist-shadow {
+      box-shadow: 4px 4px 0px #000000;
+    }
+    .brutalist-shadow-sm {
+      box-shadow: 2px 2px 0px #000000;
+    }
+    .brutalist-shadow-active {
+      box-shadow: 1px 1px 0px #000000;
+      transform: translate(2px, 2px);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#000000",
+            "on-primary-fixed": "#1b1b1b",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#5e5e5e",
+            "surface-container": "#eeeeee",
+            background: "#f9f9f9",
+            "secondary-fixed-dim": "#c8c5ca",
+            "on-error-container": "#93000a",
+            "tertiary-fixed": "#e3e1ec",
+            "on-secondary-container": "#656467",
+            "on-secondary": "#ffffff",
+            error: "#000000",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#83838c",
+            "surface-dim": "#dadada",
+            "error-container": "#ffdad6",
+            "on-surface-variant": "#4c4546",
+            "surface-variant": "#e2e2e2",
+            "on-primary-container": "#848484",
+            "primary-fixed": "#e2e2e2",
+            "on-error": "#ffffff",
+            "tertiary-container": "#1a1b22",
+            "secondary-fixed": "#e4e1e6",
+            "secondary": "#5f5e61",
+            "inverse-primary": "#c6c6c6",
+            "surface-container-highest": "#e2e2e2",
+            "inverse-surface": "#2f3131",
+            "primary-fixed-dim": "#c6c6c6",
+            "on-tertiary-fixed": "#1a1b22",
+            "surface-bright": "#f9f9f9",
+            "tertiary-fixed-dim": "#c6c5cf",
+            "on-background": "#1a1c1c",
+            "on-secondary-fixed": "#1b1b1e",
+            "on-primary-fixed-variant": "#474747",
+            "on-primary": "#ffffff",
+            "on-surface": "#1a1c1c",
+            "on-tertiary-fixed-variant": "#46464e",
+            "inverse-on-surface": "#f0f1f1",
+            surface: "#f9f9f9",
+            "surface-container-low": "#f3f3f4",
+            "on-secondary-fixed-variant": "#47464a",
+            "surface-container-high": "#e8e8e8",
+            "secondary-container": "#e4e1e6",
+            "primary-container": "#1b1b1b",
+            outline: "#000000",
+            tertiary: "#000000",
+            "outline-variant": "#cfc4c5"
+          },
+          fontFamily: {
+            display: ["Space Grotesk", "sans-serif"],
+            headline: ["Space Grotesk", "sans-serif"],
+            body: ["Space Grotesk", "sans-serif"],
+            label: ["Space Grotesk", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background font-body text-primary flex flex-col min-h-screen selection:bg-primary selection:text-white">
+<!-- Header -->
+<header class="fixed top-0 w-full z-50 pt-safe bg-surface border-b-[3px] border-black">
+<div class="h-16 px-4 flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<button class="w-10 h-10 flex items-center justify-center bg-white border-2 border-black brutalist-shadow-sm active:translate-x-0.5 active:translate-y-0.5 transition-all flex-shrink-0" onclick="history.back()">
+<span class="material-symbols-outlined text-[20px] font-bold text-black">arrow_back</span>
+</button>
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 bg-black text-white border-2 border-black flex items-center justify-center font-display font-bold text-xs">
+            CV
+          </div>
+<h1 class="font-display font-bold text-lg uppercase tracking-tight truncate text-black">Transcode Config</h1>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<div class="w-9 h-9 border-2 border-black bg-white text-black flex items-center justify-center brutalist-shadow-sm font-display font-bold">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col relative w-full pt-20 pb-safe bg-background px-4">
+<div class="flex flex-col w-full pb-8 max-w-md mx-auto">
+<!-- Interactive Toast Notification -->
+<div class="fixed top-20 left-4 right-4 max-w-md mx-auto z-50 flex items-center gap-2 p-3 bg-black border-[3px] border-black brutalist-shadow text-white font-display font-bold text-sm opacity-0 pointer-events-none transition-all duration-300 transform -translate-y-2" id="toast-notify">
+<span class="material-symbols-outlined text-white text-[20px]">bolt</span>
+<span class="min-w-0 flex-1 truncate uppercase" id="toast-text">Hardware Encoder Active</span>
+</div>
+<!-- Hero Status / Mode Eyebrow -->
+<div class="flex items-center justify-between py-2 mb-3">
+<div class="flex items-center gap-2 bg-white px-2.5 py-1 border-2 border-black brutalist-shadow-sm">
+<span class="w-2.5 h-2.5 bg-black border border-black"></span>
+<span class="font-display font-bold text-xs uppercase tracking-wider text-black">Hardware Engine Ready</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-black text-white border-2 border-black brutalist-shadow-sm font-display font-bold text-xs uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+<span>PRO CONFIG</span>
+</div>
+</div>
+<!-- Selected File Inspection Card -->
+<div class="relative bg-white border-[3px] border-black brutalist-shadow p-3.5 mb-4">
+<div class="flex items-start gap-3 relative z-10">
+<!-- Video Thumbnail Frame -->
+<div class="relative w-16 h-16 border-2 border-black bg-surface-container flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover filter grayscale contrast-125" data-alt="Cinematic aerial golden hour drone shot flying over rugged misty coastlines, shot in D-Log M profile with high dynamic range highlights, deep dark blues and warm sun streaks." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTGLawuvps9ZDePGNHZiufec1tdpFSNREnwkjdmuZt-iLNAR3iCPbXzO6hErqSZiQoah55aIPwKqeY_35Nr0KNCCArIHGuq2PY92KNf6DU5NeGCgEXJ7EWQMyv8BFjAwA1aF4LDC-AwW-Pf2VPzs1elxKkhHlw0uX3mniV2YRbZbhe2orXaKrnpziRB8xSR9cmZDcQ1Py7uX2PIUzgaVFjz2BL5rd7MkxWvExgiYKNqT69WPLwcI1v"/>
+<div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+<div class="w-6 h-6 bg-white border border-black flex items-center justify-center text-black shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+</div>
+<!-- File Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1 mb-1">
+<div class="flex items-center gap-1.5 min-w-0">
+<h2 class="font-display font-bold text-sm tracking-tight text-black truncate">DJI_Mini4_Sunset_Flight.MOV</h2>
+<span class="material-symbols-outlined text-black text-[18px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<button class="px-2 py-0.5 border-2 border-black bg-black text-white font-display font-bold text-xs uppercase tracking-wider brutalist-shadow-sm active:translate-x-0.5 active:translate-y-0.5 transition-all flex-shrink-0" id="btn-change-file">
+                CHANGE
+              </button>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 border border-black bg-white text-black font-display font-bold text-[11px] uppercase">
+                1.42 GB
+              </span>
+<span class="px-1.5 py-0.5 border border-black bg-white text-black font-display font-bold text-[11px] uppercase">
+                4K UHD 60fps
+              </span>
+<span class="px-1.5 py-0.5 border border-black bg-black text-white font-display font-bold text-[11px] uppercase">
+                ProRes 422 HQ
+              </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Camera LOG / HDR Color Profile Selector -->
+<div class="bg-white border-[3px] border-black brutalist-shadow p-3.5 mb-4">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-black text-[20px]">palette</span>
+<label class="font-display font-bold text-xs uppercase tracking-wider text-black" for="log-select">Camera LOG / HDR Profile</label>
+</div>
+<div class="flex items-center gap-1 px-2 py-0.5 bg-black text-white border-2 border-black font-display font-bold text-[10px] tracking-wider uppercase">
+<span>PRO</span>
+</div>
+</div>
+<!-- Select box -->
+<div class="relative mt-2">
+<select class="w-full h-12 pl-3 pr-10 border-2 border-black bg-surface-container-low text-black font-display font-bold text-sm uppercase rounded-none appearance-none cursor-pointer focus:outline-none focus:bg-white" id="log-select">
+<option selected="" value="dlog_m">D-Log M (DJI Drones &amp; Action)</option>
+<option value="slog3">Sony S-Log3 / S-Gamut3.Cine</option>
+<option value="apple_log">Apple Log (iPhone 15/16 Pro)</option>
+<option value="flog2">Fujifilm F-Log2</option>
+<option value="canon_clog3">Canon C-Log 3</option>
+<option value="rec709">Standard Rec.709 (No Transform)</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white border-l-2 border-black bg-black">
+<span class="material-symbols-outlined text-[20px] font-bold">expand_more</span>
+</div>
+</div>
+<!-- Brutalist Explainer note -->
+<div class="mt-2.5 p-2 bg-surface-container-low border-2 border-black flex items-start gap-2">
+<span class="material-symbols-outlined text-black text-[18px] flex-shrink-0 mt-0.5">auto_fix_high</span>
+<p class="font-body text-xs text-black/80 leading-tight">
+            Applies hardware BT.709 tonemapping matrix directly on-chip without requiring external LUT files.
+          </p>
+</div>
+</div>
+<!-- Quality Preset Section -->
+<div class="flex flex-col gap-2 mb-4">
+<div class="flex items-center justify-between px-0.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-black text-[18px]">tune</span>
+<h3 class="font-display font-bold text-xs uppercase tracking-wider text-black">Compression Quality</h3>
+</div>
+<span class="font-display font-bold text-[11px] uppercase tracking-wider text-black/60">Mode: Constant Rate</span>
+</div>
+<div class="flex flex-col gap-2.5" id="preset-group">
+<!-- Option 1: Balanced (Selected) -->
+<div class="cursor-pointer border-[3px] border-black bg-black text-white brutalist-shadow p-3 transition-all flex items-center justify-between relative" id="preset-balanced" onclick="selectPreset('balanced')">
+<div class="flex-1 min-w-0 pr-2">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-display font-bold text-sm uppercase tracking-tight text-white">Balanced (CRF 23)</span>
+<span class="px-1.5 py-0.2 bg-white text-black border border-black font-display font-bold text-[10px] uppercase">Optimal</span>
+</div>
+<p class="font-body text-xs text-white/80">Social formats: Reels, TikTok, YouTube 4K/FHD</p>
+</div>
+<div class="w-6 h-6 border-2 border-white bg-white flex items-center justify-center text-black flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+</div>
+<!-- Option 2: High Quality -->
+<div class="cursor-pointer border-[3px] border-black bg-white text-black brutalist-shadow p-3 transition-all flex items-center justify-between relative hover:bg-surface-container-low" id="preset-high" onclick="selectPreset('high')">
+<div class="flex-1 min-w-0 pr-2">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-display font-bold text-sm uppercase tracking-tight text-black">High Quality (CRF 18)</span>
+</div>
+<p class="font-body text-xs text-black/70">Near-lossless visual fidelity for master archival</p>
+</div>
+<div class="w-6 h-6 border-2 border-black bg-white flex items-center justify-center text-transparent flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+</div>
+<!-- Option 3: Small File -->
+<div class="cursor-pointer border-[3px] border-black bg-white text-black brutalist-shadow p-3 transition-all flex items-center justify-between relative hover:bg-surface-container-low" id="preset-small" onclick="selectPreset('small')">
+<div class="flex-1 min-w-0 pr-2">
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-display font-bold text-sm uppercase tracking-tight text-black">Small File (CRF 28)</span>
+</div>
+<p class="font-body text-xs text-black/70">Under 25MB target for messaging, Discord &amp; web</p>
+</div>
+<div class="w-6 h-6 border-2 border-black bg-white flex items-center justify-center text-transparent flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Output Codec Selector -->
+<div class="bg-white border-[3px] border-black brutalist-shadow p-3.5 mb-4">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-black text-[20px]">memory</span>
+<label class="font-display font-bold text-xs uppercase tracking-wider text-black">Output Video Codec</label>
+</div>
+<span class="px-2 py-0.5 bg-black border-2 border-black text-white font-display font-bold text-[10px] tracking-wider uppercase">GPU ACCEL</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2">
+<button class="flex flex-col items-center justify-center py-2.5 px-2 border-2 border-black bg-black text-white brutalist-shadow-sm transition-all" id="codec-hevc" onclick="selectCodec('hevc')" type="button">
+<span class="font-display font-bold text-sm uppercase">H.265 (HEVC)</span>
+<span class="font-display text-[11px] font-medium text-white/80 uppercase mt-0.5">-50% Size Efficiency</span>
+</button>
+<button class="flex flex-col items-center justify-center py-2.5 px-2 border-2 border-black bg-white text-black transition-all hover:bg-surface-container-low" id="codec-avc" onclick="selectCodec('avc')" type="button">
+<span class="font-display font-bold text-sm uppercase">H.264 (AVC)</span>
+<span class="font-display text-[11px] font-medium text-black/70 uppercase mt-0.5">Universal Compat</span>
+</button>
+</div>
+</div>
+<!-- Target Resolution Grid -->
+<div class="bg-white border-[3px] border-black brutalist-shadow p-3.5 mb-4">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-black text-[20px]">aspect_ratio</span>
+<label class="font-display font-bold text-xs uppercase tracking-wider text-black">Target Resolution</label>
+</div>
+<span class="font-display font-bold text-[10px] uppercase tracking-wider text-black/60">Filter: Lanczos</span>
+</div>
+<div class="grid grid-cols-4 gap-2 mt-1" id="res-group">
+<!-- 4K Pro -->
+<button class="flex flex-col items-center justify-center py-2 px-1 border-2 border-black bg-white text-black active:translate-y-0.5 transition-all" id="res-4k" onclick="selectResolution('4k')" type="button">
+<span class="font-display font-bold text-xs uppercase">4K UHD</span>
+<span class="text-[9px] font-display font-bold text-black mt-0.5 uppercase">PRO</span>
+</button>
+<!-- 2K Pro -->
+<button class="flex flex-col items-center justify-center py-2 px-1 border-2 border-black bg-white text-black active:translate-y-0.5 transition-all" id="res-2k" onclick="selectResolution('2k')" type="button">
+<span class="font-display font-bold text-xs uppercase">1440P</span>
+<span class="text-[9px] font-display font-bold text-black mt-0.5 uppercase">PRO</span>
+</button>
+<!-- 1080p Selected -->
+<button class="flex flex-col items-center justify-center py-2 px-1 border-2 border-black bg-black text-white brutalist-shadow-sm active:translate-y-0.5 transition-all" id="res-1080p" onclick="selectResolution('1080p')" type="button">
+<span class="font-display font-bold text-xs uppercase">1080P</span>
+<span class="text-[9px] font-display font-bold text-white mt-0.5 uppercase">FHD</span>
+</button>
+<!-- 720p -->
+<button class="flex flex-col items-center justify-center py-2 px-1 border-2 border-black bg-white text-black active:translate-y-0.5 transition-all" id="res-720p" onclick="selectResolution('720p')" type="button">
+<span class="font-display font-bold text-xs uppercase">720P</span>
+<span class="text-[9px] font-display font-bold text-black/60 mt-0.5 uppercase">FAST HD</span>
+</button>
+</div>
+</div>
+<!-- Real-time Compression Metric Card -->
+<div class="border-[3px] border-black bg-white brutalist-shadow p-3.5 mb-4 flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 border-2 border-black bg-black text-white flex items-center justify-center font-bold flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">save</span>
+</div>
+<div class="min-w-0">
+<div class="font-display font-bold text-[10px] text-black/60 uppercase tracking-wider">Estimated Output</div>
+<div class="font-display font-bold text-lg text-black tracking-tight truncate" id="est-size-text">
+              ~380 MB
+            </div>
+</div>
+</div>
+<!-- Savings badge -->
+<div class="px-2.5 py-1 bg-black text-white border-2 border-black flex items-center gap-1 brutalist-shadow-sm flex-shrink-0">
+<span class="material-symbols-outlined text-white text-[16px] font-bold">trending_down</span>
+<span class="font-display font-bold text-xs uppercase" id="est-percent-text">73% REDUCTION</span>
+</div>
+</div>
+<!-- Primary Action CTA Button -->
+<button class="w-full h-14 border-[3px] border-black bg-black text-white flex items-center justify-center gap-2 brutalist-shadow active:translate-x-1 active:translate-y-1 active:shadow-none transition-all duration-75 mb-4 focus:outline-none" id="btn-compress" onclick="startCompression()">
+<span class="material-symbols-outlined text-[24px] font-bold">bolt</span>
+<span class="font-display font-bold text-base tracking-wider uppercase">Compress Video Now</span>
+</button>
+<!-- Bottom AdMob Banner Container -->
+<div class="w-full border-[3px] border-black bg-white p-2 flex flex-col brutalist-shadow">
+<div class="w-full flex items-center justify-between px-1 mb-1">
+<span class="font-display font-bold text-[10px] tracking-widest uppercase text-black/60">SPONSORED PARTNER</span>
+<span class="material-symbols-outlined text-black text-[14px]">info</span>
+</div>
+<div class="w-full h-[60px] border-2 border-black bg-surface-container-low flex items-center justify-between px-3 gap-2">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-9 h-9 border border-black bg-black flex items-center justify-center text-white flex-shrink-0 font-bold">
+<span class="material-symbols-outlined text-[20px]">cloud_upload</span>
+</div>
+<div class="min-w-0">
+<p class="font-display font-bold text-xs uppercase text-black truncate">Convertix Cloud Backup</p>
+<p class="font-body text-[11px] text-black/70 truncate">Lossless archival for drone clips up to 2TB.</p>
+</div>
+</div>
+<button class="px-3 py-1 border-2 border-black bg-black text-white font-display font-bold text-xs uppercase brutalist-shadow-sm active:translate-x-0.5 active:translate-y-0.5 flex-shrink-0">
+            GET
+          </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interactions Script -->
+<script>
+    let activePreset = 'balanced';
+    let activeCodec = 'hevc';
+    let activeRes = '1080p';
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-notify');
+      const text = document.getElementById('toast-text');
+      if (toast && text) {
+        text.innerText = message;
+        toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+          toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+          toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 2200);
+      }
+    }
+
+    function updateEstimates() {
+      const sizeEl = document.getElementById('est-size-text');
+      const pctEl = document.getElementById('est-percent-text');
+      if (!sizeEl || !pctEl) return;
+
+      if (activePreset === 'high') {
+        sizeEl.innerText = activeCodec === 'hevc' ? '~680 MB' : '~920 MB';
+        pctEl.innerText = activeCodec === 'hevc' ? '52% REDUCTION' : '35% REDUCTION';
+      } else if (activePreset === 'small') {
+        sizeEl.innerText = activeCodec === 'hevc' ? '~140 MB' : '~210 MB';
+        pctEl.innerText = activeCodec === 'hevc' ? '90% REDUCTION' : '85% REDUCTION';
+      } else {
+        sizeEl.innerText = activeCodec === 'hevc' ? '~380 MB' : '~520 MB';
+        pctEl.innerText = activeCodec === 'hevc' ? '73% REDUCTION' : '63% REDUCTION';
+      }
+    }
+
+    function selectPreset(preset) {
+      activePreset = preset;
+      const presets = ['balanced', 'high', 'small'];
+
+      presets.forEach(p => {
+        const card = document.getElementById('preset-' + p);
+        if (!card) return;
+        const iconContainer = card.querySelector('div:last-child');
+        const titleSpan = card.querySelector('span:first-child');
+        const descP = card.querySelector('p');
+
+        if (p === preset) {
+          card.className = 'cursor-pointer border-[3px] border-black bg-black text-white brutalist-shadow p-3 transition-all flex items-center justify-between relative';
+          if (titleSpan) titleSpan.className = 'font-display font-bold text-sm uppercase tracking-tight text-white';
+          if (descP) descP.className = 'font-body text-xs text-white/80';
+          iconContainer.className = 'w-6 h-6 border-2 border-white bg-white flex items-center justify-center text-black flex-shrink-0';
+          iconContainer.innerHTML = '<span class="material-symbols-outlined text-[16px] font-bold">check</span>';
+        } else {
+          card.className = 'cursor-pointer border-[3px] border-black bg-white text-black brutalist-shadow p-3 transition-all flex items-center justify-between relative hover:bg-surface-container-low';
+          if (titleSpan) titleSpan.className = 'font-display font-bold text-sm uppercase tracking-tight text-black';
+          if (descP) descP.className = 'font-body text-xs text-black/70';
+          iconContainer.className = 'w-6 h-6 border-2 border-black bg-white flex items-center justify-center text-transparent flex-shrink-0';
+          iconContainer.innerHTML = '<span class="material-symbols-outlined text-[16px] font-bold">check</span>';
+        }
+      });
+
+      updateEstimates();
+    }
+
+    function selectCodec(codec) {
+      activeCodec = codec;
+      const hevcBtn = document.getElementById('codec-hevc');
+      const avcBtn = document.getElementById('codec-avc');
+
+      if (codec === 'hevc') {
+        hevcBtn.className = 'flex flex-col items-center justify-center py-2.5 px-2 border-2 border-black bg-black text-white brutalist-shadow-sm transition-all';
+        hevcBtn.querySelector('span:last-child').className = 'font-display text-[11px] font-medium text-white/80 uppercase mt-0.5';
+        avcBtn.className = 'flex flex-col items-center justify-center py-2.5 px-2 border-2 border-black bg-white text-black transition-all hover:bg-surface-container-low';
+        avcBtn.querySelector('span:last-child').className = 'font-display text-[11px] font-medium text-black/70 uppercase mt-0.5';
+        showToast('HEVC H.265 Hardware Encoder Configured');
+      } else {
+        avcBtn.className = 'flex flex-col items-center justify-center py-2.5 px-2 border-2 border-black bg-black text-white brutalist-shadow-sm transition-all';
+        avcBtn.querySelector('span:last-child').className = 'font-display text-[11px] font-medium text-white/80 uppercase mt-0.5';
+        hevcBtn.className = 'flex flex-col items-center justify-center py-2.5 px-2 border-2 border-black bg-white text-black transition-all hover:bg-surface-container-low';
+        hevcBtn.querySelector('span:last-child').className = 'font-display text-[11px] font-medium text-black/70 uppercase mt-0.5';
+        showToast('H.264 Universal Profile Configured');
+      }
+      updateEstimates();
+    }
+
+    function selectResolution(res) {
+      activeRes = res;
+      const items = ['4k', '2k', '1080p', '720p'];
+
+      if (res === '4k' || res === '2k') {
+        showToast('PRO: High-Resolution Engine Selected');
+      }
+
+      items.forEach(item => {
+        const btn = document.getElementById('res-' + item);
+        if (!btn) return;
+        const subtext = btn.querySelector('span:last-child');
+        if (item === res) {
+          btn.className = 'flex flex-col items-center justify-center py-2 px-1 border-2 border-black bg-black text-white brutalist-shadow-sm active:translate-y-0.5 transition-all';
+          if (subtext) subtext.className = 'text-[9px] font-display font-bold text-white mt-0.5 uppercase';
+        } else {
+          btn.className = 'flex flex-col items-center justify-center py-2 px-1 border-2 border-black bg-white text-black active:translate-y-0.5 transition-all';
+          if (subtext) subtext.className = 'text-[9px] font-display font-bold text-black/60 mt-0.5 uppercase';
+        }
+      });
+    }
+
+    function startCompression() {
+      const btn = document.getElementById('btn-compress');
+      if (!btn) return;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin font-bold">progress_activity</span><span class="font-display font-bold text-base uppercase">Transcoding Engine Active...</span>';
+      setTimeout(() => {
+        showToast('Processing pipeline running');
+        btn.innerHTML = '<span class="material-symbols-outlined text-[24px] font-bold">bolt</span><span class="font-display font-bold text-base tracking-wider uppercase">Compress Video Now</span>';
+      }, 1400);
+    }
+
+    document.getElementById('log-select')?.addEventListener('change', function(e) {
+      showToast('LOG Profile Transformed: ' + e.target.value.toUpperCase());
+    });
+
+    document.getElementById('btn-change-file')?.addEventListener('click', function() {
+      showToast('Media Selector Initiated');
+    });
+  </script>
+</body></html>

@@ -155,7 +155,11 @@ class _DocumentConvertScreenState extends ConsumerState<DocumentConvertScreen> {
               ),
             ),
           ),
-          if (!isConverting) const BannerAdWidget(),
+          Visibility(
+            visible: !isConverting,
+            maintainState: true,
+            child: const BannerAdWidget(),
+          ),
         ],
       ),
     );

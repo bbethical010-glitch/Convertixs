@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/history_entry.dart';
 import '../models/conversion_result.dart';
+import 'ad_service.dart';
 
 final historyServiceProvider = Provider<HistoryService>((ref) {
   return HistoryService();
@@ -133,6 +134,9 @@ class HistoryService {
       toolName: toolName,
     );
 
+    // Warm up/preload interstitial ad while conversion runs
+    AdService.preloadInterstitialAd();
+
     try {
       final result = await task();
       if (result != null) {
@@ -144,6 +148,11 @@ class HistoryService {
             contentUri: result.contentUri,
             displayLocation: result.displayLocation,
           );
+
+          // Pop up interstitial ad after every successful conversion
+          Future.delayed(const Duration(milliseconds: 300), () {
+            AdService.showInterstitialAdIfAvailable();
+          });
         } else if (result.isCancelled) {
           await markFailed(id: id, status: HistoryEntryStatus.cancelled);
         } else {

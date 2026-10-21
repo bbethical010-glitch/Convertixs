@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../media_tools/media_tool_screen.dart';
-import 'log_profiles.dart';
 import 'video_compression_provider.dart';
 
 class VideoCompressionScreen extends ConsumerWidget {
@@ -24,10 +23,7 @@ class VideoCompressionScreen extends ConsumerWidget {
       showResolution: true,
       showVideoCodec: true,
       showCompressionQuality: true,
-      showLogProfile: true,
-      logProfileOptions: logProfiles
-          .map((profile) => LabelledOption<String>(profile.id, profile.displayName))
-          .toList(),
+      showLogProfile: false,
       onConvert: (inputFile, settings, onProgress) => notifier.convert(
         inputFile: inputFile,
         config: VideoCompressionConfig(

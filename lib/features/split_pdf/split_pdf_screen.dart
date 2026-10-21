@@ -146,7 +146,11 @@ class _SplitPdfScreenState extends ConsumerState<SplitPdfScreen> {
               ),
             ),
           ),
-          if (!isConverting) const BannerAdWidget(),
+          Visibility(
+            visible: !isConverting,
+            maintainState: true,
+            child: const BannerAdWidget(),
+          ),
         ],
       ),
     );

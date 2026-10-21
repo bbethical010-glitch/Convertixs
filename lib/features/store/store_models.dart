@@ -52,6 +52,26 @@ class ProStatus {
     this.creditsBalance = 0,
   });
 
+  ProStatus copyWith({
+    bool? isLifetimePro,
+    bool? hasActiveSubscription,
+    String? activeSubscriptionId,
+    bool? isAdsRemovedOnly,
+    bool? hasFilmmakerPack,
+    bool? hasDocumentPack,
+    int? creditsBalance,
+  }) {
+    return ProStatus(
+      isLifetimePro: isLifetimePro ?? this.isLifetimePro,
+      hasActiveSubscription: hasActiveSubscription ?? this.hasActiveSubscription,
+      activeSubscriptionId: activeSubscriptionId ?? this.activeSubscriptionId,
+      isAdsRemovedOnly: isAdsRemovedOnly ?? this.isAdsRemovedOnly,
+      hasFilmmakerPack: hasFilmmakerPack ?? this.hasFilmmakerPack,
+      hasDocumentPack: hasDocumentPack ?? this.hasDocumentPack,
+      creditsBalance: creditsBalance ?? this.creditsBalance,
+    );
+  }
+
   /// User has full VIP access to everything
   bool get isPro => isLifetimePro || hasActiveSubscription;
 
@@ -134,10 +154,10 @@ final List<StoreProduct> kCatalogProducts = [
     features: [
       'All Pro features & future updates',
       'Completely Ad-Free experience',
-      'All 10 Camera LOG/HDR Profiles',
-      '4K & 2K Ultra HD video conversions',
+      'Compress videos for WhatsApp & Email sharing',
+      'High Definition video & audio conversion',
       'Unlimited document & PDF file size',
-      'Priority high-speed cloud queue',
+      'Fast high-speed conversion priority',
     ],
   ),
   const StoreProduct(
@@ -151,8 +171,8 @@ final List<StoreProduct> kCatalogProducts = [
     features: [
       'All Pro features included',
       'Completely Ad-Free experience',
-      'All 10 Camera LOG/HDR Profiles',
-      '4K & 2K Ultra HD video conversions',
+      'Compress videos for WhatsApp & Email sharing',
+      'High Definition video & audio conversion',
       'Unlimited document file sizes',
       'Cancel anytime via Google Play',
     ],
@@ -172,7 +192,7 @@ final List<StoreProduct> kCatalogProducts = [
       'Lifetime access with zero recurring fees',
       'All current & upcoming Pro features',
       'Permanent Ad removal forever',
-      'All camera LOG tone mapping & 4K exports',
+      'Compress large videos to easily share on WhatsApp & Email',
       'Unlimited document conversion file limits',
       'Works across all your Android devices',
     ],
@@ -194,18 +214,18 @@ final List<StoreProduct> kCatalogProducts = [
   ),
   const StoreProduct(
     id: StoreProductIds.bundleFilmmaker,
-    title: 'Filmmaker Video Pack',
-    description: 'Advanced LOG tone mapping & high-resolution video tools',
+    title: 'All-In-One Power Pack',
+    description: 'High-speed video compression, audio extraction & document suite',
     defaultPrice: '₹149 once',
     type: ProductType.nonConsumable,
     icon: LucideIcons.video,
     color: Color(0xFF06B6D4), // Cyan
-    badge: 'CREATOR SPECIAL',
+    badge: 'POWER PACK',
     features: [
-      'All 10 Sony, Canon, DJI, Panasonic LOG profiles',
-      'BT.709 Hable & Reinhard HDR tone mapping',
-      'Ultra HD 4K & 2K video resolution exports',
-      'High-bitrate audio retention',
+      'Unlimited high-speed video compression',
+      'Extract high quality MP3 audio from any video',
+      'Fast multi-file PDF split, merge & photo conversion',
+      'Save massive phone storage space',
     ],
   ),
   const StoreProduct(
@@ -236,7 +256,7 @@ final List<StoreProduct> kCatalogProducts = [
     creditsAmount: 50,
     features: [
       '50 High-priority conversions',
-      'Use for large documents or 4K video exports',
+      'Great for everyday files, PDFs & videos',
       'Credits never expire',
       'Can be repurchased anytime',
     ],

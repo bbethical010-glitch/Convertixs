@@ -164,7 +164,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'Remove ads, unlock 4K video & camera LOG profiles',
+                    'Remove ads, faster conversions & unlock all packs',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 12,

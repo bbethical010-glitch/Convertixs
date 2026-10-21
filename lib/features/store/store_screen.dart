@@ -331,11 +331,11 @@ class _StoreScreenState extends ConsumerState<StoreScreen>
             runSpacing: 8,
             children: [
               _buildFeatureBadge('🚫 Ad-Free', isPro || status.isAdsRemoved),
-              _buildFeatureBadge('🎬 10 LOG Profiles', isPro || status.canUseFilmmaker),
-              _buildFeatureBadge('🖥️ 4K Video', isPro || status.canUseFilmmaker),
+              _buildFeatureBadge('⚡ Fast Processing', isPro || status.canUseFilmmaker),
+              _buildFeatureBadge('📦 Bulk Conversion', isPro || status.canUseFilmmaker),
               _buildFeatureBadge('📑 Unlimited Size', isPro || status.canUseDocumentPro),
               if (status.creditsBalance > 0)
-                _buildFeatureBadge('🪙 ${status.creditsBalance} Credits', true),
+                _buildFeatureBadge('🪙 ${status.creditsBalance} Files', true),
             ],
           ),
         ],
@@ -556,10 +556,10 @@ class _StoreScreenState extends ConsumerState<StoreScreen>
 
     final comparison = [
       ('In-App Ads', 'Banner Ads', 'No Ads Forever'),
-      ('Video Tone Mapping', 'Standard SDR', 'All 10 LOG Profiles'),
-      ('Video Max Resolution', '1080p', '4K & 2K Ultra HD'),
+      ('Video Compression', 'Standard', 'WhatsApp & Email Ready'),
+      ('Audio Extraction', 'Standard', 'High Quality MP3'),
       ('Document File Size', 'Max 50 MB', 'Unlimited'),
-      ('Server Processing', 'Standard', 'VIP Priority Queue'),
+      ('Conversion Speed', 'Standard', 'VIP Fast Track'),
     ];
 
     return Card(
