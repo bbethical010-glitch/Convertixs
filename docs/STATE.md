@@ -4,12 +4,12 @@
 
 | Field | Value |
 |---|---|
-| Last uploaded versionCode | 25 |
-| Last uploaded versionName | 1.1.2 |
-| Current release versionCode | 26 |
-| Current release versionName | 1.1.3 |
+| Last uploaded versionCode | 26 |
+| Last uploaded versionName | 1.1.3 |
+| Current release versionCode | 27 |
+| Current release versionName | 1.1.4 |
 | Upload date | Oct 2026 |
-| Next minimum versionCode | 27 |
+| Next minimum versionCode | 28 |
 | Signing keystore | new-upload-key.jks (generated Aug 25 2026) |
 | Play App Signing | Enrolled — Google holds app signing key |
 
